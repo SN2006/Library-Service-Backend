@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookService {
@@ -43,6 +44,12 @@ public class BookService {
 
     @Transactional
     public BookDto save(CreateBookDto createBookDto) {
+        Optional<Book> book = bookRepository.findBookByTitle(createBookDto.getTitle());
+
+        if (book.isPresent()) {
+            throw new AppException("Book already exists", HttpStatus.BAD_REQUEST);
+        }
+
         User publisher = userRepository.findById(createBookDto.getPublisherId()).orElse(null);
 
         Book bookToSave = convector.convertToBook(createBookDto);
