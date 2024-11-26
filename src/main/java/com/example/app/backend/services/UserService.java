@@ -5,12 +5,13 @@ import com.example.app.backend.dto.userDtos.SignUpDto;
 import com.example.app.backend.dto.userDtos.UserDto;
 import com.example.app.backend.entity.User;
 import com.example.app.backend.enums.Role;
-import com.example.app.backend.exceptions.AuthException;
+import com.example.app.backend.exceptions.AppException;
 import com.example.app.backend.repositories.UserRepository;
 import com.example.app.backend.util.AppConvector;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.CharBuffer;
 import java.util.Optional;
@@ -28,9 +29,10 @@ public class UserService {
         this.convector = convector;
     }
 
+    @Transactional(readOnly = true)
     public UserDto login(CredentialsDto credentialsDto){
         User user = userRepository.findByEmail(credentialsDto.getEmail())
-                .orElseThrow(() -> new AuthException("Unknown user", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
         if (passwordEncoder.matches(
                 CharBuffer.wrap(credentialsDto.getPassword()), user.getPassword()
@@ -38,13 +40,14 @@ public class UserService {
             return convector.convertToUserDto(user);
         }
 
-        throw new AuthException("Invalid password", HttpStatus.BAD_REQUEST);
+        throw new AppException("Invalid password", HttpStatus.BAD_REQUEST);
     }
 
+    @Transactional
     public UserDto register(SignUpDto signUpDto){
         Optional<User> optionalUser = userRepository.findByEmail(signUpDto.getEmail());
         if (optionalUser.isPresent()) {
-            throw new AuthException("Email already in use", HttpStatus.BAD_REQUEST);
+            throw new AppException("Email already in use", HttpStatus.BAD_REQUEST);
         }
 
         User user = convector.convertToUser(signUpDto);
@@ -55,9 +58,10 @@ public class UserService {
         return convector.convertToUserDto(savedUser);
     }
 
+    @Transactional(readOnly = true)
     public UserDto findUserByEmail(String email){
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthException("Unknown user", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
 
         return convector.convertToUserDto(user);
     }
