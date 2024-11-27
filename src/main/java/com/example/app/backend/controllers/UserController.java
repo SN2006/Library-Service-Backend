@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @CrossOrigin(origins = {"http://localhost:5173/"})
@@ -34,5 +36,11 @@ public class UserController {
     public ResponseEntity<UserDto> create(@RequestBody @Validated SignUpDto signUpDto){
         UserDto userDto = userService.register(signUpDto);
         return ResponseEntity.ok(userDto);
+    }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @GetMapping
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.findAll());
     }
 }

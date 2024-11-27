@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.CharBuffer;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -56,6 +57,14 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         return convector.convertToUserDto(savedUser);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserDto> findAll(){
+        return userRepository.findAll()
+                .stream()
+                .map(convector::convertToUserDto)
+                .toList();
     }
 
     @Transactional(readOnly = true)
