@@ -7,7 +7,6 @@ import com.example.app.backend.dto.userDtos.UserDto;
 import com.example.app.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +14,7 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@CrossOrigin(origins = {"http://localhost:5173/"})
 public class AuthController {
 
     private final UserService userService;
@@ -24,12 +24,6 @@ public class AuthController {
     public AuthController(UserService userService, UserAuthProvider userAuthProvider) {
         this.userService = userService;
         this.userAuthProvider = userAuthProvider;
-    }
-
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Hello World");
     }
 
     @PostMapping("/login")
